@@ -21,18 +21,33 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    try {
-                        docker.build("${DOCKER_IMAGE_NAME}:${IMAGE_TAG}")
-                    } catch (Exception e) {
-                        echo "Failed to build Docker image: ${e.message}"
-                        error "Failed to build Docker image"
-                    }
-                }
-            }
+       // stage('Build Docker Image') {
+         //   steps {
+          //      script {
+           //         try {
+             //           docker.build("${DOCKER_IMAGE_NAME}:${IMAGE_TAG}")
+               //     } catch (Exception e) {
+                 //       echo "Failed to build Docker image: ${e.message}"
+                   //     error "Failed to build Docker image"
+                    //}
+               // }
+           // }
+        //}
+stage('Build Docker Image') {
+    steps {
+        script {
+            // Option A: Explicitly log out to ensure public images pull anonymously without 401 errors
+            sh "docker logout" 
+            sh "docker build -t pd44/docker_jenkins_demo:1.0 ."
+            
+            // OR Option B: Wrap it inside your valid credentials block if you want to pull as a logged-in user
+            // withCredentials([usernamePassword(credentialsId: 'your-docker-hub-credentials-id', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+            //     sh "echo \$PASS | docker login -u \$USER --password-stdin"
+            //     sh "docker build -t pd44/docker_jenkins_demo:1.0 ."
+            // }
         }
+    }
+}
 
         stage('Push to DockerHub') {
             steps {
